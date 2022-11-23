@@ -75,3 +75,19 @@ environment variables with the prefix `EBUSD_`, e.g. the following line can be u
 > docker run -d --name=ebusd --device=/dev/ttyUSB0 -p 8888 -e EBUSD_SCANCONFIG= -e EBUSD_DEVICE=/dev/ttyUSB0 -e EBUSD_MQTTPORT=1883 -e EBUSD_MQTTHOST=BROKERHOST john30/ebusd
 
 This eases use of e.g. docker-compose files.
+
+
+Running newer images on older operating systems
+-----------------------------------------------
+When running a newer image on an older operating system, the container might face several issues like invalid system
+date or access restrictions, which e.g. prevents using the HTTPS based config webservice.
+
+In order to test if this is the case for the current setup, starting the image like this will reveal a date of 1970:
+> docker run -it --rm john30/ebusd date
+
+If that's the case, the easiest way to circumvent it is to run the container without the default security constraints
+set by docker, i.e. add the following argument to the docker run command:
+> --security-opt seccomp=unconfined
+
+Another option is to update docker and/or the [libseccomp library](https://github.com/moby/moby/issues/40734) on the
+host. See also [here](https://serverfault.com/questions/1037146/docker-container-with-random-date/1048351#1048351).

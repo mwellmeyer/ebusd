@@ -2,7 +2,8 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches:
+    - master
     paths:
       - 'src/**'
       - 'autogen.sh'
@@ -30,6 +31,10 @@ jobs:
         name: checkout
         uses: actions/checkout@v2
       -
+        name: gh-describe
+        id: gittag
+        uses: proudust/gh-describe@v1.4.6
+      -
         name: set up QEMU
         uses: docker/setup-qemu-action@v1
       -
@@ -46,4 +51,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: build
-        run: cd contrib/docker && LIMITARCH=${{ github.event.inputs.limitarch }} ./build.sh
+        run: cd contrib/docker && GIT_BRANCH=${GITHUB_REF##*/} ./build.sh
+        env:
+          GIT_REVISION: ${{ steps.gittag.outputs.describe }}
+          LIMITARCH: ${{ github.event.inputs.limitarch }}
